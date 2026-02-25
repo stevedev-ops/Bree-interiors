@@ -203,6 +203,7 @@ img {
 .heading-lg {
   font-size: clamp(2.5rem, 4vw, 3.5rem);
 }
+
 /* Mobile Responsiveness & Utilities */
 .grid-2-col {
   display: grid;
@@ -240,7 +241,7 @@ img {
   .mobile-text-center {
     text-align: center;
   }
-  
+
   .desktop-only {
     display: none !important;
   }
@@ -280,7 +281,7 @@ img {
   .nav-links.active {
     right: 0;
   }
-  
+
   .nav-overlay {
     position: fixed;
     top: 0;
@@ -298,4 +299,154 @@ img {
     opacity: 1;
     visibility: visible;
   }
+}
+
+/* Rich Text Editor Content Styling */
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 2rem 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: block;
+}
+
+.blog-content p {
+  margin-bottom: 1.5rem;
+}
+
+.blog-content h2,
+.blog-content h3,
+.blog-content h4 {
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--color-charcoal);
+}
+
+.blog-content ul,
+.blog-content ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.blog-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Portfolio Page Enhancements */
+
+/* Link Filters */
+.filter-link {
+  position: relative;
+  padding-bottom: 5px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  border: none;
+  background: none;
+}
+
+.filter-link:hover,
+.filter-link.active {
+  color: var(--color-charcoal);
+  font-weight: 500;
+}
+
+.filter-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 50%;
+  background-color: var(--color-terracotta);
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.filter-link:hover::after,
+.filter-link.active::after {
+  width: 100%;
+  left: 0;
+}
+
+/* Masonry Layout */
+.my-masonry-grid {
+  display: flex;
+  margin-left: -30px;
+  /* gutter size offset */
+  width: auto;
+}
+
+.my-masonry-grid_column {
+  padding-left: 30px;
+  /* gutter size */
+  background-clip: padding-box;
+}
+
+.my-masonry-grid_column>div {
+  margin-bottom: 30px;
+  /* space between items */
+}
+
+/* Project Cards Hover Effects */
+.portfolio-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  /* Slight rounding for a premium feel */
+}
+
+.portfolio-card img {
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.portfolio-card:hover img {
+  transform: scale(1.05);
+}
+
+.portfolio-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(47, 46, 44, 0.3);
+  /* Subtle dark wash */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  /* Let clicks pass through to the Link */
+}
+
+.portfolio-card:hover .portfolio-overlay {
+  opacity: 1;
+}
+
+.portfolio-overlay-text {
+  color: var(--color-warm-white);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 12px 24px;
+  border: 1px solid rgba(247, 245, 240, 0.5);
+  transform: translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease;
+  backdrop-filter: blur(2px);
+}
+
+.portfolio-card:hover .portfolio-overlay-text {
+  transform: translateY(0);
+}
+
+.portfolio-overlay-text:hover {
+  background-color: var(--color-warm-white);
+  color: var(--color-charcoal);
 }

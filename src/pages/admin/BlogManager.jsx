@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Plus } from 'lucide-react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const BlogManager = () => {
     const [posts, setPosts] = useState([]);
@@ -13,6 +15,9 @@ const BlogManager = () => {
     const [editUploading, setEditUploading] = useState(false);
     const [formStatus, setFormStatus] = useState('');
     const [editStatus, setEditStatus] = useState('');
+
+    const reactQuillRef = useRef(null);
+    const editReactQuillRef = useRef(null);
 
     useEffect(() => { fetchPosts(); }, []);
 
@@ -88,6 +93,79 @@ const BlogManager = () => {
         fetchPosts();
     };
 
+    // Custom image handler for ReactQuill
+    const imageHandler = async (isEdit) => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) return;
+
+            const setStatusFn = isEdit ? setEditStatus : setFormStatus;
+            setStatusFn('Uploading embedded image...');
+
+            try {
+                const fileExt = file.name.split('.').pop();
+                const filePath = `blog_content/${Math.random()}.${fileExt}`;
+                const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file);
+
+                if (uploadError) {
+                    setStatusFn(`Image upload failed: ${uploadError.message}`);
+                    return;
+                }
+
+                const { data } = supabase.storage.from('images').getPublicUrl(filePath);
+
+                // Get the editor instance and insert the image
+                const quill = isEdit
+                    ? editReactQuillRef.current.getEditor()
+                    : reactQuillRef.current.getEditor();
+
+                const range = quill.getSelection(true);
+                quill.insertEmbed(range.index, 'image', data.publicUrl);
+                quill.setSelection(range.index + 1);
+
+                setStatusFn('Image uploaded successfully.');
+                setTimeout(() => setStatusFn(''), 3000);
+            } catch (err) {
+                setStatusFn(`Error: ${err.message}`);
+            }
+        };
+    };
+
+    const modules = useMemo(() => ({
+        toolbar: {
+            container: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                ['link', 'image'],
+                ['clean']
+            ],
+            handlers: {
+                image: () => imageHandler(false)
+            }
+        }
+    }), []);
+
+    const editModules = useMemo(() => ({
+        toolbar: {
+            container: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                ['link', 'image'],
+                ['clean']
+            ],
+            handlers: {
+                image: () => imageHandler(true)
+            }
+        }
+    }), []);
+
     const imgInput = (imageUrl, onChangeFile, onChangeUrl, up, remove) => (
         <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
             {imageUrl && (
@@ -97,7 +175,7 @@ const BlogManager = () => {
             )}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <label style={{ display: 'block', padding: '10px', border: '2px dashed #e5e7eb', borderRadius: '6px', textAlign: 'center', cursor: up ? 'not-allowed' : 'pointer', backgroundColor: '#f9fafb', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                    {up ? 'Uploading...' : 'Upload Image File'}
+                    {up ? 'Uploading...' : 'Upload Featured Image'}
                     <input type="file" accept="image/*" onChange={onChangeFile} disabled={up} style={{ display: 'none' }} />
                 </label>
 
@@ -112,7 +190,7 @@ const BlogManager = () => {
                     />
                 </div>
 
-                {imageUrl && <button type="button" onClick={remove} style={{ fontSize: '0.8rem', color: '#ef4444', background: 'none', cursor: 'pointer', textAlign: 'left', marginTop: '4px' }}>Remove Image</button>}
+                {imageUrl && <button type="button" onClick={remove} style={{ fontSize: '0.8rem', color: '#ef4444', background: 'none', cursor: 'pointer', textAlign: 'left', marginTop: '4px' }}>Remove Featured Image</button>}
             </div>
         </div>
     );
@@ -141,12 +219,21 @@ const BlogManager = () => {
                             <textarea value={newPost.excerpt} onChange={e => setNewPost({ ...newPost, excerpt: e.target.value })} rows={2} style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '6px' }} />
                         </div>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Content * (HTML allowed)</label>
-                            <textarea required value={newPost.content} onChange={e => setNewPost({ ...newPost, content: e.target.value })} rows={10} style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '6px', fontFamily: 'monospace' }} />
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Content *</label>
+                            <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
+                                <ReactQuill
+                                    ref={reactQuillRef}
+                                    theme="snow"
+                                    value={newPost.content}
+                                    onChange={(content) => setNewPost({ ...newPost, content })}
+                                    modules={modules}
+                                    style={{ height: '300px', marginBottom: '40px' }}
+                                />
+                            </div>
                         </div>
                     </div>
                     <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Image</label>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Featured Image</label>
                         {imgInput(
                             newPost.image_url,
                             (e) => handleImageUpload(e, false),
@@ -210,12 +297,21 @@ const BlogManager = () => {
                                                             <textarea value={editPost.excerpt} onChange={e => setEditPost({ ...editPost, excerpt: e.target.value })} rows={2} style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '6px' }} />
                                                         </div>
                                                         <div>
-                                                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Content * (HTML allowed)</label>
-                                                            <textarea required value={editPost.content} onChange={e => setEditPost({ ...editPost, content: e.target.value })} rows={10} style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '6px', fontFamily: 'monospace' }} />
+                                                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Content *</label>
+                                                            <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
+                                                                <ReactQuill
+                                                                    ref={editReactQuillRef}
+                                                                    theme="snow"
+                                                                    value={editPost.content}
+                                                                    onChange={(content) => setEditPost({ ...editPost, content })}
+                                                                    modules={editModules}
+                                                                    style={{ height: '300px', marginBottom: '40px' }}
+                                                                />
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Image</label>
+                                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Featured Image</label>
                                                         {imgInput(
                                                             editPost.image_url,
                                                             (e) => handleImageUpload(e, true),

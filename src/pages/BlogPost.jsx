@@ -112,6 +112,7 @@ const BlogPost = () => {
                 {/* Content */}
                 <article className="container" style={{ maxWidth: '800px' }}>
                     <div
+                        className="blog-content"
                         style={{
                             fontSize: '1.1rem',
                             lineHeight: '1.8',
