@@ -1,8 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import { supabase } from '../lib/supabase';
 
 const DesignJourney = () => {
     const pageRef = useScrollReveal();
+    const [content, setContent] = useState({
+        journey_subtitle: 'Process',
+        journey_title: 'The Design Journey',
+        journey_desc: 'A seamless, premium, and highly organized experience from the first sketch to the final reveal.'
+    });
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            const { data } = await supabase.from('site_settings').select('key, value');
+            if (data) {
+                const newContent = { ...content };
+                data.forEach(item => {
+                    if (Object.keys(newContent).includes(item.key)) {
+                        newContent[item.key] = item.value;
+                    }
+                });
+                setContent(newContent);
+            }
+        };
+        fetchContent();
+    }, []);
+
+    const renderHTML = (rawHTML) => React.createElement("span", { dangerouslySetInnerHTML: { __html: rawHTML } });
 
     const steps = [
         { num: '01', title: 'Discovery Consultation', desc: 'We start with an in-depth conversation to understand your lifestyle, aesthetic preferences, and practical needs. We discuss budget, timeline, and overall vision.' },
@@ -17,10 +41,10 @@ const DesignJourney = () => {
         <div ref={pageRef} style={{ paddingTop: '80px' }}>
             <section className="section bg-secondary text-center">
                 <div className="container reveal">
-                    <span className="subtitle mb-2">Process</span>
-                    <h1 className="heading-xl mb-4">The Design Journey</h1>
+                    <span className="subtitle mb-2">{content.journey_subtitle}</span>
+                    <h1 className="heading-xl mb-4">{renderHTML(content.journey_title)}</h1>
                     <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
-                        A seamless, premium, and highly organized experience from the first sketch to the final reveal.
+                        {content.journey_desc}
                     </p>
                 </div>
             </section>

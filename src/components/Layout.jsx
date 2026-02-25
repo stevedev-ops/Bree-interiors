@@ -1,7 +1,11 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Outlet, Link } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 
 const Layout = () => {
+    const [isNavOpen, setIsNavOpen] = useState(false);
+
+    const closeNav = () => setIsNavOpen(false);
     return (
         <div className="layout">
             <header className="header">
@@ -10,15 +14,25 @@ const Layout = () => {
                         Bree <span style={{ color: 'var(--color-terracotta)' }}>Interiors</span>.
                     </div>
                     <nav className="nav">
-                        <ul style={{ display: 'flex', listStyle: 'none', gap: '30px', alignItems: 'center' }}>
-                            <li><a href="/">Home</a></li>
-                            <li><a href="/about">About</a></li>
-                            <li><a href="/portfolio">Portfolio</a></li>
-                            <li><a href="/journey">The Journey</a></li>
-                            <li><a href="/services">Services</a></li>
-                            <li><a href="/contact" style={{ display: 'inline-block', padding: '8px 20px', backgroundColor: 'var(--color-charcoal)', color: 'var(--color-warm-white)' }}>Contact</a></li>
+                        {/* Hamburger Icon (Mobile Only) */}
+                        <div className="mobile-only" style={{ cursor: 'pointer', zIndex: 1001, position: isNavOpen ? 'fixed' : 'static', right: isNavOpen ? '30px' : 'auto' }} onClick={() => setIsNavOpen(!isNavOpen)}>
+                            {isNavOpen ? <X size={28} /> : <Menu size={28} />}
+                        </div>
+
+                        {/* Nav Links */}
+                        <ul className={`nav-links ${isNavOpen ? 'active' : ''}`}>
+                            <li><Link to="/" onClick={closeNav}>Home</Link></li>
+                            <li><Link to="/about" onClick={closeNav}>About</Link></li>
+                            <li><Link to="/portfolio" onClick={closeNav}>Portfolio</Link></li>
+                            <li><Link to="/journey" onClick={closeNav}>The Journey</Link></li>
+                            <li><Link to="/services" onClick={closeNav}>Services</Link></li>
+                            <li><Link to="/blog" onClick={closeNav}>Blog</Link></li>
+                            <li><Link to="/contact" onClick={closeNav} style={{ display: 'inline-block', padding: '8px 20px', backgroundColor: 'var(--color-charcoal)', color: 'var(--color-warm-white)' }}>Contact</Link></li>
                         </ul>
                     </nav>
+
+                    {/* Overlay for mobile drawer */}
+                    <div className={`nav-overlay mobile-only ${isNavOpen ? 'active' : ''}`} onClick={closeNav}></div>
                 </div>
             </header>
 

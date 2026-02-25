@@ -1,10 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const Services = () => {
     const pageRef = useScrollReveal();
     const [openFaq, setOpenFaq] = useState(null);
+    const [content, setContent] = useState({
+        services_title: 'Our Services',
+        services_subtitle: 'Tailored design solutions for exclusive residential and commercial spaces.'
+    });
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            const { data } = await supabase.from('site_settings').select('key, value');
+            if (data) {
+                const newContent = { ...content };
+                data.forEach(item => {
+                    if (Object.keys(newContent).includes(item.key)) {
+                        newContent[item.key] = item.value;
+                    }
+                });
+                setContent(newContent);
+            }
+        };
+        fetchContent();
+    }, []);
+
 
     const toggleFaq = (index) => {
         if (openFaq === index) setOpenFaq(null);
@@ -25,20 +47,22 @@ const Services = () => {
         { title: "Commercial Design", desc: "Boutique hotels, luxury lodges, and high-end offices. We design commercial spaces that embody your brand and provide an exceptional experience for your guests." }
     ];
 
+    const renderHTML = (rawHTML) => React.createElement("span", { dangerouslySetInnerHTML: { __html: rawHTML } });
+
     return (
         <div ref={pageRef} style={{ paddingTop: '80px' }}>
             <section className="section bg-secondary text-center">
                 <div className="container reveal">
-                    <h1 className="heading-xl mb-4">Our Services</h1>
+                    <h1 className="heading-xl mb-4">{renderHTML(content.services_title)}</h1>
                     <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
-                        Tailored design solutions for exclusive residential and commercial spaces.
+                        {content.services_subtitle}
                     </p>
                 </div>
             </section>
 
             <section className="section">
                 <div className="container">
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '3rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '3rem' }}>
                         {services.map((svc, index) => (
                             <div key={svc.title} className={`reveal delay-${(index % 2) * 100}`} style={{ padding: '3rem', border: '1px solid #EBE6DF' }}>
                                 <h3 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: 'var(--color-charcoal)' }}>{svc.title}</h3>

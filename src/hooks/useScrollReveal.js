@@ -21,16 +21,42 @@ export const useScrollReveal = () => {
         );
 
         const currentRef = ref.current;
+        let mutationObserver;
 
-        // Select all elements with the 'reveal' class within this ref
         if (currentRef) {
-            const elements = currentRef.querySelectorAll('.reveal');
-            elements.forEach((el) => observer.observe(el));
+            // Function to find and observe all reveal elements
+            const observeElements = () => {
+                const elements = currentRef.querySelectorAll('.reveal');
+                elements.forEach((el) => {
+                    // Only observe if it hasn't been active yet
+                    if (!el.classList.contains('active')) {
+                        observer.observe(el);
+                    }
+                });
 
-            // Also observe the container itself if it has the reveal class
-            if (currentRef.classList.contains('reveal')) {
-                observer.observe(currentRef);
-            }
+                if (currentRef.classList.contains('reveal')) {
+                    observer.observe(currentRef);
+                }
+            };
+
+            // Initial observation
+            observeElements();
+
+            // Setup MutationObserver to watch for dynamically added elements (like async API data)
+            mutationObserver = new MutationObserver((mutations) => {
+                let shouldReObserve = false;
+                for (let mutation of mutations) {
+                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                        shouldReObserve = true;
+                        break;
+                    }
+                }
+                if (shouldReObserve) {
+                    observeElements();
+                }
+            });
+
+            mutationObserver.observe(currentRef, { childList: true, subtree: true });
         }
 
         return () => {
@@ -39,6 +65,9 @@ export const useScrollReveal = () => {
                 elements.forEach((el) => observer.unobserve(el));
             }
             observer.disconnect();
+            if (mutationObserver) {
+                mutationObserver.disconnect();
+            }
         };
     }, []);
 

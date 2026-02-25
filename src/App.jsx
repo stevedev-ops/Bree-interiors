@@ -7,6 +7,8 @@ import DesignJourney from './pages/DesignJourney';
 import Services from './pages/Services';
 import Sustainability from './pages/Sustainability';
 import Contact from './pages/Contact';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogin from './pages/admin/AdminLogin';
 import Layout from './components/Layout';
@@ -25,6 +27,8 @@ function App() {
           <Route path="services" element={<Services />} />
           <Route path="sustainability" element={<Sustainability />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="blog" element={<Blog />} />
+          <Route path="blog/:id" element={<BlogPost />} />
         </Route>
 
         {/* Admin Routes */}

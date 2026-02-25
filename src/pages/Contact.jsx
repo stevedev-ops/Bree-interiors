@@ -1,10 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import { supabase } from '../lib/supabase';
 
 const Contact = () => {
     const pageRef = useScrollReveal();
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [status, setStatus] = useState('');
+    const [content, setContent] = useState({
+        contact_subtitle: 'Get in Touch',
+        contact_title: 'Let\'s Create<br />Something Beautiful.',
+        contact_desc: 'Whether you have a specific project in mind or just want to explore possibilities, we\'d love to hear from you.',
+        contact_address: 'Karen Road, The Hub <br /> Nairobi, Kenya',
+        contact_email: 'hello@breeinteriors.co.ke',
+        contact_phone: '+254 700 000 000',
+        contact_whatsapp: '254700000000'
+    });
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            const { data } = await supabase.from('site_settings').select('key, value');
+            if (data) {
+                const newContent = { ...content };
+                data.forEach(item => {
+                    if (Object.keys(newContent).includes(item.key)) {
+                        newContent[item.key] = item.value;
+                    }
+                });
+                setContent(newContent);
+            }
+        };
+        fetchContent();
+    }, []);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -12,7 +38,6 @@ const Contact = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Simulate form submission
         setStatus('Sending...');
         setTimeout(() => {
             setStatus('Message sent successfully! We will get back to you soon.');
@@ -20,14 +45,16 @@ const Contact = () => {
         }, 1500);
     };
 
+    const renderHTML = (rawHTML) => React.createElement("span", { dangerouslySetInnerHTML: { __html: rawHTML } });
+
     return (
         <div ref={pageRef} style={{ paddingTop: '80px' }}>
             <section className="section bg-secondary text-center">
                 <div className="container reveal">
-                    <span className="subtitle mb-2">Get in Touch</span>
-                    <h1 className="heading-xl mb-4">Let's Create<br />Something Beautiful.</h1>
+                    <span className="subtitle mb-2">{content.contact_subtitle}</span>
+                    <h1 className="heading-xl mb-4">{renderHTML(content.contact_title)}</h1>
                     <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
-                        Whether you have a specific project in mind or just want to explore possibilities, we'd love to hear from you.
+                        {content.contact_desc}
                     </p>
                 </div>
             </section>
@@ -45,21 +72,23 @@ const Contact = () => {
 
                             <div style={{ marginBottom: '2rem' }}>
                                 <span className="subtitle" style={{ fontSize: '0.75rem', marginBottom: '0.5rem' }}>Studio Location</span>
-                                <p style={{ fontSize: '1.1rem' }}>Karen Road, The Hub <br /> Nairobi, Kenya</p>
+                                <p style={{ fontSize: '1.1rem' }}>{renderHTML(content.contact_address)}</p>
                             </div>
 
                             <div style={{ marginBottom: '2rem' }}>
                                 <span className="subtitle" style={{ fontSize: '0.75rem', marginBottom: '0.5rem' }}>Email Us</span>
-                                <p style={{ fontSize: '1.1rem' }}>hello@breeinteriors.co.ke</p>
+                                <p style={{ fontSize: '1.1rem' }}>
+                                    <a href={`mailto:${content.contact_email}`} style={{ color: 'inherit' }}>{content.contact_email}</a>
+                                </p>
                             </div>
 
                             <div style={{ marginBottom: '3rem' }}>
                                 <span className="subtitle" style={{ fontSize: '0.75rem', marginBottom: '0.5rem' }}>Call Us</span>
-                                <p style={{ fontSize: '1.1rem' }}>+254 700 000 000</p>
+                                <p style={{ fontSize: '1.1rem' }}>{content.contact_phone}</p>
                             </div>
 
                             <div>
-                                <a href="#whatsapp" className="btn-primary" style={{ backgroundColor: '#25D366', color: 'white', border: 'none' }}>
+                                <a href={`https://wa.me/${content.contact_whatsapp}`} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ backgroundColor: '#25D366', color: 'white', border: 'none' }}>
                                     Chat on WhatsApp
                                 </a>
                             </div>

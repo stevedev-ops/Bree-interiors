@@ -1,27 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import { supabase } from '../lib/supabase';
 
 const About = () => {
     const pageRef = useScrollReveal();
+    const [content, setContent] = useState({
+        about_hero_title: 'Crafting Spaces<br />with Soul.',
+        about_hero_p1: 'Bree Interiors was founded on a simple philosophy: true luxury is finding harmony between your heritage and your modern lifestyle.',
+        about_hero_p2: 'Based in Nairobi, our design studio bridges the gap between contemporary global design trends and authentic Kenyan materiality. We design for the discerning homeowner, the visionary hotelier, and the diaspora client yearning for a piece of authentic home.',
+        about_image_url: '/about_studio.png',
+        about_quote: '"We believe a home should be a curated collection of what you love, grounded by the earth you stand on."'
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            const { data } = await supabase.from('site_settings').select('key, value');
+            if (data) {
+                const newContent = { ...content };
+                data.forEach(item => {
+                    if (Object.keys(newContent).includes(item.key)) {
+                        newContent[item.key] = item.value;
+                    }
+                });
+                setContent(newContent);
+            }
+            setLoading(false);
+        };
+        fetchContent();
+    }, []);
+
+    // Helper to safely render HTML line breaks from the database
+    const renderHTML = (rawHTML) => React.createElement("span", { dangerouslySetInnerHTML: { __html: rawHTML } });
 
     return (
-        <div ref={pageRef} style={{ paddingTop: '80px' }}>
+        <div ref={pageRef} style={{ paddingTop: '80px', minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
             {/* Hero Section */}
             <section className="section">
-                <div className="container" style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) minmax(300px, 1fr)', gap: '4rem', alignItems: 'center' }}>
+                <div className="container grid-2-col">
                     <div className="reveal">
                         <span className="subtitle mb-2">Our Story</span>
-                        <h1 className="heading-xl mb-4">Crafting Spaces<br />with Soul.</h1>
+                        <h1 className="heading-xl mb-4">{renderHTML(content.about_hero_title)}</h1>
                         <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                            Bree Interiors was founded on a simple philosophy: true luxury is finding harmony between your heritage and your modern lifestyle.
+                            {content.about_hero_p1}
                         </p>
                         <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
-                            Based in Nairobi, our design studio bridges the gap between contemporary global design trends and authentic Kenyan materiality. We design for the discerning homeowner, the visionary hotelier, and the diaspora client yearning for a piece of authentic home.
+                            {content.about_hero_p2}
                         </p>
                     </div>
                     <div className="reveal delay-200">
                         <div style={{ aspectRatio: '3/4', backgroundColor: 'var(--color-sand)', overflow: 'hidden' }}>
-                            <img src="/about_studio.png" alt="Bree Interiors Studio Workspace" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={content.about_image_url} alt="Bree Interiors Studio Workspace" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                     </div>
                 </div>
@@ -32,7 +61,7 @@ const About = () => {
                 <div className="container reveal">
                     <span className="subtitle mb-2">Philosophy</span>
                     <h2 className="heading-lg mb-8" style={{ maxWidth: '800px', margin: '0 auto 4rem auto' }}>
-                        "We believe a home should be a curated collection of what you love, grounded by the earth you stand on."
+                        {content.about_quote}
                     </h2>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem', textAlign: 'left' }}>

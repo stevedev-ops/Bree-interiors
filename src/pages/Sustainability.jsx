@@ -1,17 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import { supabase } from '../lib/supabase';
 
 const Sustainability = () => {
     const pageRef = useScrollReveal();
+    const [content, setContent] = useState({
+        sustainability_title: 'Luxury Rooted in<br />Sustainability.',
+        sustainability_subtitle: 'We believe that true luxury is mindful. Bree Interiors is committed to eco-conscious design that uplifts local communities and respects the environment.'
+    });
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            const { data } = await supabase.from('site_settings').select('key, value');
+            if (data) {
+                const newContent = { ...content };
+                data.forEach(item => {
+                    if (Object.keys(newContent).includes(item.key)) {
+                        newContent[item.key] = item.value;
+                    }
+                });
+                setContent(newContent);
+            }
+        };
+        fetchContent();
+    }, []);
+
+    const renderHTML = (rawHTML) => React.createElement("span", { dangerouslySetInnerHTML: { __html: rawHTML } });
 
     return (
         <div ref={pageRef} style={{ paddingTop: '80px' }}>
             <section className="section bg-secondary text-center">
                 <div className="container reveal">
                     <span className="subtitle mb-2">Our Commitment</span>
-                    <h1 className="heading-xl mb-4">Luxury Rooted in<br />Sustainability.</h1>
+                    <h1 className="heading-xl mb-4">{renderHTML(content.sustainability_title)}</h1>
                     <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '700px', margin: '0 auto' }}>
-                        We believe that true luxury is mindful. Bree Interiors is committed to eco-conscious design that uplifts local communities and respects the environment.
+                        {content.sustainability_subtitle}
                     </p>
                 </div>
             </section>

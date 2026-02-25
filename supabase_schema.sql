@@ -73,3 +73,32 @@ INSERT INTO site_settings (key, value) VALUES
 ('contact_email', 'hello@breeinteriors.co.ke'),
 ('contact_phone', '+254 700 000 000'),
 ('contact_location', 'Karen Road, The Hub, Nairobi, Kenya');
+
+-- Create a table for Blog Posts
+CREATE TABLE blog_posts (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  title text NOT NULL,
+  excerpt text,
+  content text NOT NULL,
+  image_url text,
+  published boolean DEFAULT false
+);
+
+ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public blog posts are viewable by everyone."
+  ON blog_posts FOR SELECT
+  USING ( true );
+
+CREATE POLICY "Authenticated users can insert blog posts"
+  ON blog_posts FOR INSERT
+  WITH CHECK ( auth.role() = 'authenticated' );
+
+CREATE POLICY "Authenticated users can update blog posts"
+  ON blog_posts FOR UPDATE
+  USING ( auth.role() = 'authenticated' );
+
+CREATE POLICY "Authenticated users can delete blog posts"
+  ON blog_posts FOR DELETE
+  USING ( auth.role() = 'authenticated' );

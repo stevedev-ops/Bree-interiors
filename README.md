@@ -57,6 +57,7 @@ Open [http://localhost:5173](http://localhost:5173) to view the website in your 
 
 ### Admin Panel
 - **Admin Login** (`/admin/login`): Secure entry point powered by Supabase Authentication.
+  - **Test Credentials**: The default login is `admin@breeinteriors.co.ke` with password `MySecurePassword123` (ensure this user is created in your Supabase Auth dashboard).
 - **Dashboard** (`/admin`): Overview of site traffic and quick links.
 - **Content Management** (`/admin` tabs): Interfaces for updating Home page copy, hero images, and the projects portfolio.
 
