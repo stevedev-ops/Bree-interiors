@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { supabase } from '../lib/supabase';
+import SEO from '../components/SEO';
+import PageTransition from '../components/PageTransition';
 
 const DesignJourney = () => {
     const pageRef = useScrollReveal();
@@ -38,53 +40,59 @@ const DesignJourney = () => {
     ];
 
     return (
-        <div ref={pageRef} style={{ paddingTop: '80px' }}>
-            <section className="section bg-secondary text-center">
-                <div className="container reveal">
-                    <span className="subtitle mb-2">{content.journey_subtitle}</span>
-                    <h1 className="heading-xl mb-4">{renderHTML(content.journey_title)}</h1>
-                    <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
-                        {content.journey_desc}
-                    </p>
-                </div>
-            </section>
-
-            <section className="section">
-                <div className="container">
-                    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                        {steps.map((step, index) => (
-                            <div
-                                key={step.num}
-                                className={`reveal delay-${(index % 3) * 100}`}
-                                style={{
-                                    display: 'flex',
-                                    gap: '2rem',
-                                    marginBottom: '4rem',
-                                    paddingBottom: '3rem',
-                                    borderBottom: index !== steps.length - 1 ? '1px solid #EBE6DF' : 'none'
-                                }}
-                            >
-                                <div style={{
-                                    fontSize: '3.5rem',
-                                    fontFamily: 'var(--font-heading)',
-                                    color: 'var(--color-sand)',
-                                    lineHeight: '1',
-                                    opacity: 0.7
-                                }}>
-                                    {step.num}
-                                </div>
-                                <div>
-                                    <h3 style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>{step.title}</h3>
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: '1.8' }}>
-                                        {step.desc}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
+        <PageTransition>
+            <SEO
+                title="The Design Journey | Bree Interiors"
+                description="Experience a seamless, premium, and highly organized interior design process from the first sketch to the final reveal."
+            />
+            <div ref={pageRef} style={{ paddingTop: '80px' }}>
+                <section className="section bg-secondary text-center">
+                    <div className="container reveal">
+                        <span className="subtitle mb-2">{content.journey_subtitle}</span>
+                        <h1 className="heading-xl mb-4">{renderHTML(content.journey_title)}</h1>
+                        <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
+                            {content.journey_desc}
+                        </p>
                     </div>
-                </div>
-            </section>
-        </div>
+                </section>
+
+                <section className="section">
+                    <div className="container">
+                        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                            {steps.map((step, index) => (
+                                <div
+                                    key={step.num}
+                                    className={`reveal delay-${(index % 3) * 100}`}
+                                    style={{
+                                        display: 'flex',
+                                        gap: '2rem',
+                                        marginBottom: '4rem',
+                                        paddingBottom: '3rem',
+                                        borderBottom: index !== steps.length - 1 ? '1px solid #EBE6DF' : 'none'
+                                    }}
+                                >
+                                    <div style={{
+                                        fontSize: '3.5rem',
+                                        fontFamily: 'var(--font-heading)',
+                                        color: 'var(--color-sand)',
+                                        lineHeight: '1',
+                                        opacity: 0.7
+                                    }}>
+                                        {step.num}
+                                    </div>
+                                    <div>
+                                        <h3 style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>{step.title}</h3>
+                                        <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: '1.8' }}>
+                                            {step.desc}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </PageTransition>
     );
 };
 

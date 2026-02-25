@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import SEO from '../components/SEO';
+import PageTransition from '../components/PageTransition';
 
 const Services = () => {
     const pageRef = useScrollReveal();
     const [openFaq, setOpenFaq] = useState(null);
     const [content, setContent] = useState({
         services_title: 'Our Services',
-        services_subtitle: 'Tailored design solutions for exclusive residential and commercial spaces.'
+        services_subtitle: 'Tailored design solutions for exclusive residential and commercial spaces.',
+        contact_whatsapp: ''
     });
 
     useEffect(() => {
@@ -50,61 +53,67 @@ const Services = () => {
     const renderHTML = (rawHTML) => React.createElement("span", { dangerouslySetInnerHTML: { __html: rawHTML } });
 
     return (
-        <div ref={pageRef} style={{ paddingTop: '80px' }}>
-            <section className="section bg-secondary text-center">
-                <div className="container reveal">
-                    <h1 className="heading-xl mb-4">{renderHTML(content.services_title)}</h1>
-                    <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
-                        {content.services_subtitle}
-                    </p>
-                </div>
-            </section>
-
-            <section className="section">
-                <div className="container">
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '3rem' }}>
-                        {services.map((svc, index) => (
-                            <div key={svc.title} className={`reveal delay-${(index % 2) * 100}`} style={{ padding: '3rem', border: '1px solid #EBE6DF' }}>
-                                <h3 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: 'var(--color-charcoal)' }}>{svc.title}</h3>
-                                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '2rem' }}>{svc.desc}</p>
-                                <a
-                                    href={`https://wa.me/${content.contact_whatsapp}?text=${encodeURIComponent(`Hello Bree Interiors, I want to inquire about your ${svc.title} services...`)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="btn-outline"
-                                >
-                                    Inquire
-                                </a>
-                            </div>
-                        ))}
+        <PageTransition>
+            <SEO
+                title="Services | Bree Interiors"
+                description="Tailored design solutions for exclusive residential and commercial spaces."
+            />
+            <div ref={pageRef} style={{ paddingTop: '80px' }}>
+                <section className="section bg-secondary text-center">
+                    <div className="container reveal">
+                        <h1 className="heading-xl mb-4">{renderHTML(content.services_title)}</h1>
+                        <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
+                            {content.services_subtitle}
+                        </p>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <section className="section bg-secondary" id="contact">
-                <div className="container" style={{ maxWidth: '800px', margin: '0 auto' }}>
-                    <h2 className="heading-lg text-center mb-8 reveal">Frequently Asked Questions</h2>
-                    <div className="reveal delay-200">
-                        {faqs.map((faq, index) => (
-                            <div key={index} style={{ borderBottom: '1px solid #dcd5cc', padding: '1.5rem 0' }}>
-                                <button
-                                    onClick={() => toggleFaq(index)}
-                                    style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left', fontSize: '1.2rem', fontWeight: '500', color: 'var(--color-charcoal)' }}
-                                >
-                                    {faq.q}
-                                    {openFaq === index ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                                </button>
-                                {openFaq === index && (
-                                    <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                                        {faq.a}
-                                    </p>
-                                )}
-                            </div>
-                        ))}
+                <section className="section">
+                    <div className="container">
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '3rem' }}>
+                            {services.map((svc, index) => (
+                                <div key={svc.title} className={`reveal delay-${(index % 2) * 100}`} style={{ padding: '3rem', border: '1px solid #EBE6DF' }}>
+                                    <h3 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: 'var(--color-charcoal)' }}>{svc.title}</h3>
+                                    <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '2rem' }}>{svc.desc}</p>
+                                    <a
+                                        href={`https://wa.me/${content.contact_whatsapp}?text=${encodeURIComponent(`Hello Bree Interiors, I want to inquire about your ${svc.title} services...`)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn-outline"
+                                    >
+                                        Inquire
+                                    </a>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </section>
-        </div>
+                </section>
+
+                <section className="section bg-secondary" id="contact">
+                    <div className="container" style={{ maxWidth: '800px', margin: '0 auto' }}>
+                        <h2 className="heading-lg text-center mb-8 reveal">Frequently Asked Questions</h2>
+                        <div className="reveal delay-200">
+                            {faqs.map((faq, index) => (
+                                <div key={index} style={{ borderBottom: '1px solid #dcd5cc', padding: '1.5rem 0' }}>
+                                    <button
+                                        onClick={() => toggleFaq(index)}
+                                        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', textAlign: 'left', fontSize: '1.2rem', fontWeight: '500', color: 'var(--color-charcoal)' }}
+                                    >
+                                        {faq.q}
+                                        {openFaq === index ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                    </button>
+                                    {openFaq === index && (
+                                        <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                                            {faq.a}
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </PageTransition>
     );
 };
 
