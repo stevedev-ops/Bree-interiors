@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import SEO from '../components/SEO';
+import PageTransition from '../components/PageTransition';
+import ImageWithSkeleton from '../components/ImageWithSkeleton';
 
 const Portfolio = () => {
     const pageRef = useScrollReveal();
@@ -33,66 +36,72 @@ const Portfolio = () => {
         : projects.filter(p => p.category === filter);
 
     return (
-        <div ref={pageRef} style={{ paddingTop: '80px', minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
-            <section className="section bg-secondary text-center">
-                <div className="container reveal">
-                    <span className="subtitle mb-2">Our Work</span>
-                    <h1 className="heading-xl mb-4">Curated Spaces.</h1>
-                    <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto 3rem auto' }}>
-                        Explore a selection of our finest luxury Afro-Modern interiors across Kenya.
-                    </p>
+        <PageTransition>
+            <SEO
+                title="Portfolio | Bree Interiors"
+                description="Explore our curated portfolio of luxury Afro-Modern interiors across residential and commercial spaces in Kenya."
+            />
+            <div ref={pageRef} style={{ paddingTop: '80px', minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
+                <section className="section bg-secondary text-center">
+                    <div className="container reveal">
+                        <span className="subtitle mb-2">Our Work</span>
+                        <h1 className="heading-xl mb-4">Curated Spaces.</h1>
+                        <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto 3rem auto' }}>
+                            Explore a selection of our finest luxury Afro-Modern interiors across Kenya.
+                        </p>
 
-                    {/* Filter Buttons */}
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '4rem' }}>
-                        {categories.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => setFilter(cat)}
-                                style={{
-                                    padding: '8px 20px',
-                                    borderRadius: '20px',
-                                    border: `1px solid ${filter === cat ? 'var(--color-charcoal)' : '#ccc'}`,
-                                    backgroundColor: filter === cat ? 'var(--color-charcoal)' : 'transparent',
-                                    color: filter === cat ? 'var(--color-warm-white)' : 'var(--text-primary)',
-                                    transition: 'all 0.3s ease',
-                                    cursor: 'pointer',
-                                    fontFamily: 'var(--font-body)'
-                                }}
-                            >
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
+                        {/* Filter Buttons */}
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '4rem' }}>
+                            {categories.map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setFilter(cat)}
+                                    style={{
+                                        padding: '8px 20px',
+                                        borderRadius: '20px',
+                                        border: `1px solid ${filter === cat ? 'var(--color-charcoal)' : '#ccc'}`,
+                                        backgroundColor: filter === cat ? 'var(--color-charcoal)' : 'transparent',
+                                        color: filter === cat ? 'var(--color-warm-white)' : 'var(--text-primary)',
+                                        transition: 'all 0.3s ease',
+                                        cursor: 'pointer',
+                                        fontFamily: 'var(--font-body)'
+                                    }}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
 
-                    {/* Projects Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem', textAlign: 'left' }}>
-                        {loading ? (
-                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '50px', color: 'var(--text-secondary)' }}>
-                                Loading portfolio...
-                            </div>
-                        ) : filteredProjects.length === 0 ? (
-                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '50px', color: 'var(--text-secondary)' }}>
-                                No published projects found in this category.
-                            </div>
-                        ) : (
-                            filteredProjects.map((project, index) => (
-                                <Link to={`/portfolio/${project.id}`} key={`${project.id}-${filter}`} className="animate-fade-in" style={{ textDecoration: 'none', color: 'inherit', animationDelay: `${(index % 3) * 100}ms` }}>
-                                    <div style={{ position: 'relative', aspectRatio: '4/5', backgroundColor: '#e0d8d0', overflow: 'hidden', marginBottom: '1.5rem', cursor: 'pointer' }}>
-                                        {project.image_url ? (
-                                            <img src={project.image_url} alt={project.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        ) : (
-                                            <div style={{ width: '100%', height: '100%', backgroundColor: 'var(--color-charcoal)' }}></div>
-                                        )}
-                                    </div>
-                                    <span style={{ fontSize: '0.85rem', color: 'var(--color-terracotta)', textTransform: 'uppercase', letterSpacing: '1px' }}>{project.category}</span>
-                                    <h3 style={{ fontSize: '1.5rem', marginTop: '0.5rem' }}>{project.title}</h3>
-                                </Link>
-                            ))
-                        )}
+                        {/* Projects Grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem', textAlign: 'left' }}>
+                            {loading ? (
+                                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '50px', color: 'var(--text-secondary)' }}>
+                                    Loading portfolio...
+                                </div>
+                            ) : filteredProjects.length === 0 ? (
+                                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '50px', color: 'var(--text-secondary)' }}>
+                                    No published projects found in this category.
+                                </div>
+                            ) : (
+                                filteredProjects.map((project, index) => (
+                                    <Link to={`/portfolio/${project.id}`} key={`${project.id}-${filter}`} className="animate-fade-in" style={{ textDecoration: 'none', color: 'inherit', animationDelay: `${(index % 3) * 100}ms` }}>
+                                        <div style={{ position: 'relative', aspectRatio: '4/5', backgroundColor: '#e0d8d0', overflow: 'hidden', marginBottom: '1.5rem', cursor: 'pointer' }}>
+                                            {project.image_url ? (
+                                                <ImageWithSkeleton src={project.image_url} alt={project.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <div style={{ width: '100%', height: '100%', backgroundColor: 'var(--color-charcoal)' }}></div>
+                                            )}
+                                        </div>
+                                        <span style={{ fontSize: '0.85rem', color: 'var(--color-terracotta)', textTransform: 'uppercase', letterSpacing: '1px' }}>{project.category}</span>
+                                        <h3 style={{ fontSize: '1.5rem', marginTop: '0.5rem' }}>{project.title}</h3>
+                                    </Link>
+                                ))
+                            )}
+                        </div>
                     </div>
-                </div>
-            </section>
-        </div>
+                </section>
+            </div>
+        </PageTransition>
     );
 };
 

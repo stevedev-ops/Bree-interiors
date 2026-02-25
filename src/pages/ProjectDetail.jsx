@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import SEO from '../components/SEO';
+import PageTransition from '../components/PageTransition';
+import ImageWithSkeleton from '../components/ImageWithSkeleton';
 
 const ProjectDetail = () => {
     const { id } = useParams();
@@ -56,39 +59,46 @@ const ProjectDetail = () => {
     }
 
     return (
-        <div style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', paddingBottom: '80px', paddingTop: '100px' }}>
-            <div className="container">
-                <Link to="/portfolio" style={{ color: 'var(--text-secondary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '30px', transition: 'color 0.2s ease' }}>
-                    <ArrowLeft size={16} /> Back to Portfolio
-                </Link>
+        <PageTransition>
+            <SEO
+                title={`${project.title} | Bree Interiors`}
+                description={project.description || `View the ${project.category} portfolio project by Bree Interiors.`}
+                image={allImages.length > 0 ? allImages[0] : undefined}
+            />
+            <div style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', paddingBottom: '80px', paddingTop: '100px' }}>
+                <div className="container">
+                    <Link to="/portfolio" style={{ color: 'var(--text-secondary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '30px', transition: 'color 0.2s ease' }}>
+                        <ArrowLeft size={16} /> Back to Portfolio
+                    </Link>
 
-                <header style={{ marginBottom: '40px', textAlign: 'center' }}>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--color-terracotta)', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '10px' }}>
-                        {project.category}
-                    </span>
-                    <h1 className="heading-xl" style={{ color: 'var(--color-charcoal)', marginBottom: '20px' }}>{project.title}</h1>
-                    {project.description && (
-                        <p style={{ maxWidth: '700px', margin: '0 auto', fontSize: '1.1rem', lineHeight: '1.8', color: 'var(--text-secondary)' }}>
-                            {project.description}
-                        </p>
-                    )}
-                </header>
+                    <header style={{ marginBottom: '40px', textAlign: 'center' }}>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--color-terracotta)', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '10px' }}>
+                            {project.category}
+                        </span>
+                        <h1 className="heading-xl" style={{ color: 'var(--color-charcoal)', marginBottom: '20px' }}>{project.title}</h1>
+                        {project.description && (
+                            <p style={{ maxWidth: '700px', margin: '0 auto', fontSize: '1.1rem', lineHeight: '1.8', color: 'var(--text-secondary)' }}>
+                                {project.description}
+                            </p>
+                        )}
+                    </header>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '2rem' }}>
-                    {allImages.length > 0 ? (
-                        allImages.map((img, index) => (
-                            <div key={index} style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', backgroundColor: '#e0d8d0', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-                                <img src={img} alt={`${project.title} - Image ${index + 1}`} style={{ width: '100%', display: 'block', objectFit: 'cover' }} />
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '2rem' }}>
+                        {allImages.length > 0 ? (
+                            allImages.map((img, index) => (
+                                <div key={index} style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', backgroundColor: '#e0d8d0', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                                    <ImageWithSkeleton src={img} alt={`${project.title} - Image ${index + 1}`} style={{ width: '100%', display: 'block', objectFit: 'cover' }} />
+                                </div>
+                            ))
+                        ) : (
+                            <div style={{ width: '100%', padding: '100px 0', backgroundColor: '#e0d8d0', borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-secondary)' }}>
+                                No images available for this project.
                             </div>
-                        ))
-                    ) : (
-                        <div style={{ width: '100%', padding: '100px 0', backgroundColor: '#e0d8d0', borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-secondary)' }}>
-                            No images available for this project.
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
+        </PageTransition>
     );
 };
 
