@@ -38,11 +38,17 @@ const Contact = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setStatus('Sending...');
+
+        const messageText = `*New Inquiry*\n\n*Name:* ${formData.name}\n*Email:* ${formData.email}\n*Subject:* ${formData.subject}\n\n*Message:*\n${formData.message}`;
+        const whatsappUrl = `https://wa.me/${content.contact_whatsapp}?text=${encodeURIComponent(messageText)}`;
+
+        window.open(whatsappUrl, '_blank');
+
+        setStatus('Redirecting to WhatsApp...');
         setTimeout(() => {
-            setStatus('Message sent successfully! We will get back to you soon.');
             setFormData({ name: '', email: '', subject: '', message: '' });
-        }, 1500);
+            setStatus('');
+        }, 3000);
     };
 
     const renderHTML = (rawHTML) => React.createElement("span", { dangerouslySetInnerHTML: { __html: rawHTML } });
