@@ -621,7 +621,7 @@ const ProjectsManager = () => {
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [editProject, setEditProject] = useState(null);
-    const [newProject, setNewProject] = useState({ title: '', category: '', image_url: '', published: true, featured: false });
+    const [newProject, setNewProject] = useState({ title: '', category: '', image_url: '', description: '', gallery: [], published: true, featured: false });
     const [uploading, setUploading] = useState(false);
     const [editUploading, setEditUploading] = useState(false);
     const [formStatus, setFormStatus] = useState('');
@@ -651,7 +651,9 @@ const ProjectsManager = () => {
         const { error } = await supabase.from('projects').update({
             title: editProject.title,
             category: editProject.category,
+            description: editProject.description || '',
             image_url: editProject.image_url,
+            gallery: editProject.gallery || [],
             published: editProject.published,
             featured: editProject.featured || false
         }).eq('id', editProject.id);
@@ -696,7 +698,7 @@ const ProjectsManager = () => {
             return;
         }
         setIsAdding(false);
-        setNewProject({ title: '', category: '', image_url: '', published: true, featured: false });
+        setNewProject({ title: '', category: '', image_url: '', description: '', gallery: [], published: true, featured: false });
         setFormStatus('');
         fetchProjects();
     };
@@ -765,7 +767,11 @@ const ProjectsManager = () => {
                         </div>
                     </div>
                     <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Image</label>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Short Description (Optional)</label>
+                        <textarea rows={3} value={newProject.description || ''} onChange={e => setNewProject({ ...newProject, description: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '6px', fontFamily: 'var(--font-body)' }} />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Primary Image *</label>
                         {imgInput(
                             newProject.image_url,
                             (e) => handleImageUpload(e, false),
@@ -773,6 +779,45 @@ const ProjectsManager = () => {
                             uploading,
                             () => setNewProject({ ...newProject, image_url: '' })
                         )}
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Additional Gallery Images (Up to 4)</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {[0, 1, 2, 3].map(index => (
+                                <div key={`new-gal-${index}`} style={{ padding: '10px', border: '1px solid #f3f4f6', borderRadius: '6px' }}>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '5px' }}>Gallery Image {index + 1}</span>
+                                    {imgInput(
+                                        newProject.gallery?.[index] || '',
+                                        async (e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
+                                            setUploading(true); setFormStatus('Uploading gallery image...');
+                                            const fileExt = file.name.split('.').pop();
+                                            const filePath = `projects/${Math.random()}.${fileExt}`;
+                                            const { error } = await supabase.storage.from('images').upload(filePath, file);
+                                            if (error) { setFormStatus(`Upload failed: ${error.message}`); setUploading(false); return; }
+                                            const { data } = supabase.storage.from('images').getPublicUrl(filePath);
+                                            const newGal = [...(newProject.gallery || [])];
+                                            newGal[index] = data.publicUrl;
+                                            setNewProject({ ...newProject, gallery: newGal });
+                                            setFormStatus('Gallery image ready.');
+                                            setUploading(false);
+                                        },
+                                        (e) => {
+                                            const newGal = [...(newProject.gallery || [])];
+                                            newGal[index] = e.target.value;
+                                            setNewProject({ ...newProject, gallery: newGal });
+                                        },
+                                        uploading,
+                                        () => {
+                                            const newGal = [...(newProject.gallery || [])];
+                                            newGal[index] = '';
+                                            setNewProject({ ...newProject, gallery: newGal });
+                                        }
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -836,7 +881,11 @@ const ProjectsManager = () => {
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Image</label>
+                                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Short Description (Optional)</label>
+                                                        <textarea rows={3} value={editProject.description || ''} onChange={e => setEditProject({ ...editProject, description: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '6px', fontFamily: 'var(--font-body)' }} />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Primary Image *</label>
                                                         {imgInput(
                                                             editProject.image_url,
                                                             (e) => handleImageUpload(e, true),
@@ -844,6 +893,45 @@ const ProjectsManager = () => {
                                                             editUploading,
                                                             () => setEditProject({ ...editProject, image_url: '' })
                                                         )}
+                                                    </div>
+                                                    <div>
+                                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Additional Gallery Images (Up to 4)</label>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                            {[0, 1, 2, 3].map(index => (
+                                                                <div key={`edit-gal-${index}`} style={{ padding: '10px', border: '1px solid #f3f4f6', borderRadius: '6px' }}>
+                                                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '5px' }}>Gallery Image {index + 1}</span>
+                                                                    {imgInput(
+                                                                        editProject.gallery?.[index] || '',
+                                                                        async (e) => {
+                                                                            const file = e.target.files[0];
+                                                                            if (!file) return;
+                                                                            setEditUploading(true); setEditStatus('Uploading gallery image...');
+                                                                            const fileExt = file.name.split('.').pop();
+                                                                            const filePath = `projects/${Math.random()}.${fileExt}`;
+                                                                            const { error } = await supabase.storage.from('images').upload(filePath, file);
+                                                                            if (error) { setEditStatus(`Upload failed: ${error.message}`); setEditUploading(false); return; }
+                                                                            const { data } = supabase.storage.from('images').getPublicUrl(filePath);
+                                                                            const newGal = [...(editProject.gallery || [])];
+                                                                            newGal[index] = data.publicUrl;
+                                                                            setEditProject({ ...editProject, gallery: newGal });
+                                                                            setEditStatus('Gallery image ready.');
+                                                                            setEditUploading(false);
+                                                                        },
+                                                                        (e) => {
+                                                                            const newGal = [...(editProject.gallery || [])];
+                                                                            newGal[index] = e.target.value;
+                                                                            setEditProject({ ...editProject, gallery: newGal });
+                                                                        },
+                                                                        editUploading,
+                                                                        () => {
+                                                                            const newGal = [...(editProject.gallery || [])];
+                                                                            newGal[index] = '';
+                                                                            setEditProject({ ...editProject, gallery: newGal });
+                                                                        }
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -877,6 +965,8 @@ const AdminDashboard = () => {
     const [session, setSession] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [projectCount, setProjectCount] = useState(0);
+    const [blogCount, setBlogCount] = useState(0);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -887,6 +977,16 @@ const AdminDashboard = () => {
                 navigate('/admin/login');
             } else {
                 setSession(session);
+
+                // Fetch dynamic stats for dashboard
+                const fetchStats = async () => {
+                    const { count: projCount } = await supabase.from('projects').select('*', { count: 'exact', head: true });
+                    const { count: blgCount } = await supabase.from('blog_posts').select('*', { count: 'exact', head: true });
+
+                    if (projCount !== null) setProjectCount(projCount);
+                    if (blgCount !== null) setBlogCount(blgCount);
+                };
+                fetchStats();
             }
             setLoading(false);
         };
@@ -981,15 +1081,15 @@ const AdminDashboard = () => {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
                         <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
                             <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase' }}>Total Projects</h3>
-                            <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--color-charcoal)', marginTop: '10px' }}>12</p>
+                            <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--color-charcoal)', marginTop: '10px' }}>{projectCount}</p>
                         </div>
                         <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-                            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase' }}>Page Views (30d)</h3>
+                            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase' }}>Total Blog Posts</h3>
+                            <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--color-terracotta)', marginTop: '10px' }}>{blogCount}</p>
+                        </div>
+                        <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+                            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase' }}>Page Views (Demo)</h3>
                             <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--color-charcoal)', marginTop: '10px' }}>2.4k</p>
-                        </div>
-                        <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-                            <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase' }}>New Inquiries</h3>
-                            <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--color-terracotta)', marginTop: '10px' }}>5</p>
                         </div>
                     </div>
                 )}

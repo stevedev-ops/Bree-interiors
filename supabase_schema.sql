@@ -102,3 +102,8 @@ CREATE POLICY "Authenticated users can update blog posts"
 CREATE POLICY "Authenticated users can delete blog posts"
   ON blog_posts FOR DELETE
   USING ( auth.role() = 'authenticated' );
+
+-- ==============================================================================
+-- Portfolio Gallery Updates (Run this if adding the 5-image gallery feature)
+-- ==============================================================================
+ALTER TABLE projects ADD COLUMN gallery text[] DEFAULT '{}'::text[];

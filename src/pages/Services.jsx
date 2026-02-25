@@ -67,7 +67,14 @@ const Services = () => {
                             <div key={svc.title} className={`reveal delay-${(index % 2) * 100}`} style={{ padding: '3rem', border: '1px solid #EBE6DF' }}>
                                 <h3 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: 'var(--color-charcoal)' }}>{svc.title}</h3>
                                 <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '2rem' }}>{svc.desc}</p>
-                                <a href="#contact" className="btn-outline">Inquire</a>
+                                <a
+                                    href={`https://wa.me/${content.contact_whatsapp}?text=${encodeURIComponent(`Hello Bree Interiors, I want to inquire about your ${svc.title} services...`)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn-outline"
+                                >
+                                    Inquire
+                                </a>
                             </div>
                         ))}
                     </div>

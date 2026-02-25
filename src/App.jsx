@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import About from './pages/About';
 import Portfolio from './pages/Portfolio';
+import ProjectDetail from './pages/ProjectDetail';
 import DesignJourney from './pages/DesignJourney';
 import Services from './pages/Services';
 import Sustainability from './pages/Sustainability';
@@ -23,6 +24,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="about" element={<About />} />
           <Route path="portfolio" element={<Portfolio />} />
+          <Route path="portfolio/:id" element={<ProjectDetail />} />
           <Route path="journey" element={<DesignJourney />} />
           <Route path="services" element={<Services />} />
           <Route path="sustainability" element={<Sustainability />} />
