@@ -35,7 +35,7 @@ const Blog = () => {
         <div style={{ paddingTop: '80px', backgroundColor: 'var(--color-warm-white)', minHeight: '100vh' }}>
             <div className="container">
                 <section style={{ textAlign: 'center', padding: '60px 0', borderBottom: '1px solid #e5e7eb', marginBottom: '40px' }}>
-                    <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '3rem', color: 'var(--color-charcoal)', marginBottom: '15px' }}>
+                    <h1 className="heading-xl" style={{ color: 'var(--color-charcoal)', marginBottom: '15px' }}>
                         Our <span style={{ color: 'var(--color-terracotta)' }}>Blog</span>
                     </h1>
                     <p style={{ maxWidth: '600px', margin: '0 auto', color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: '1.8' }}>
@@ -105,10 +105,10 @@ const Blog = () => {
             {/* Newsletter CTA */}
             <section style={{ backgroundColor: 'var(--color-olive)', color: 'var(--color-warm-white)', padding: '60px 0', marginTop: '60px' }}>
                 <div className="container" style={{ textAlign: 'center' }}>
-                    <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', marginBottom: '15px' }}>Subscribe to our Blog</h2>
+                    <h2 className="heading-lg" style={{ marginBottom: '15px' }}>Subscribe to our Blog</h2>
                     <p style={{ maxWidth: '500px', margin: '0 auto', opacity: 0.9, marginBottom: '25px' }}>Get the latest design insights and inspiration delivered directly to your inbox.</p>
-                    <form style={{ display: 'flex', gap: '10px', maxWidth: '450px', margin: '0 auto', justifyContent: 'center' }} onSubmit={(e) => { e.preventDefault(); alert('Subscribed!'); }}>
-                        <input type="email" placeholder="Your email address" required style={{ flex: 1, padding: '12px 20px', borderRadius: '4px', border: 'none', fontFamily: 'inherit' }} />
+                    <form style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', maxWidth: '450px', margin: '0 auto', justifyContent: 'center' }} onSubmit={(e) => { e.preventDefault(); alert('Subscribed!'); }}>
+                        <input type="email" placeholder="Your email address" required style={{ flex: 1, minWidth: '200px', padding: '12px 20px', borderRadius: '4px', border: 'none', fontFamily: 'inherit' }} />
                         <button type="submit" className="btn-primary" style={{ backgroundColor: 'var(--color-charcoal)', color: 'white', border: 'none' }}>Subscribe</button>
                     </form>
                 </div>

@@ -71,7 +71,7 @@ const BlogPost = () => {
                     <Link to="/blog" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '20px', fontSize: '0.9rem', transition: 'color 0.2s ease' }}>
                         <ArrowLeft size={16} /> Back to Blog
                     </Link>
-                    <h1 className="heading-lg" style={{ lineHeight: '1.2', maxWidth: '800px', marginBottom: '20px' }}>
+                    <h1 className="heading-xl" style={{ lineHeight: '1.2', maxWidth: '800px', marginBottom: '20px' }}>
                         {post.title}
                     </h1>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px', color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>
@@ -89,7 +89,7 @@ const BlogPost = () => {
 
             {/* Featured Image */}
             {post.image_url && (
-                <div className="container" style={{ marginTop: '-40px', position: 'relative', zIndex: 3, marginBottom: '40px' }}>
+                <div className="container" style={{ marginTop: '20px', position: 'relative', zIndex: 1, marginBottom: '40px' }}>
                     <div style={{ width: '100%', height: 'clamp(250px, 50vh, 500px)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
                         <img
                             src={post.image_url}
