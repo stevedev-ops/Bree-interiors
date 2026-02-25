@@ -66,7 +66,7 @@ const Portfolio = () => {
                     </div>
 
                     {/* Projects Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '3rem', textAlign: 'left' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem', textAlign: 'left' }}>
                         {loading ? (
                             <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '50px', color: 'var(--text-secondary)' }}>
                                 Loading portfolio...

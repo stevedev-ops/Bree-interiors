@@ -161,7 +161,7 @@ const Home = () => {
                         </a>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
                         {loading ? (
                             <p style={{ color: 'var(--text-secondary)' }}>Loading portfolio projects...</p>
                         ) : featuredProjects.length > 0 ? (

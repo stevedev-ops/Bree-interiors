@@ -61,7 +61,7 @@ const Contact = () => {
 
             <section className="section">
                 <div className="container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem' }}>
+                    <div className="grid-2-col">
 
                         {/* Contact Info */}
                         <div className="reveal">
