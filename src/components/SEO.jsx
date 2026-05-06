@@ -31,6 +31,7 @@ const SEO = ({ title, description }) => {
             <title>{title}</title>
             {description && <meta name="description" content={description} />}
             <meta name="keywords" content={keywords} />
+            <meta name="google-site-verification" content="Co8tG8sswhVWobbNILLrQ9g3ukYkVPs3j32y--Tufk0" />
             
             {/* Open Graph tags for better sharing */}
             <meta property="og:title" content={title} />
