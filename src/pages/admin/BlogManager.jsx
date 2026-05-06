@@ -1,0 +1,364 @@
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import api from '../../lib/api';
+import { Plus } from 'lucide-react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+const BlogManager = () => {
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isAdding, setIsAdding] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [editPost, setEditPost] = useState(null);
+    const [newPost, setNewPost] = useState({ title: '', excerpt: '', content: '', image_url: '', published: true });
+    const [uploading, setUploading] = useState(false);
+    const [editUploading, setEditUploading] = useState(false);
+    const [formStatus, setFormStatus] = useState('');
+    const [editStatus, setEditStatus] = useState('');
+
+    const reactQuillRef = useRef(null);
+    const editReactQuillRef = useRef(null);
+
+    useEffect(() => { fetchPosts(); }, []);
+
+    const fetchPosts = async () => {
+        setLoading(true);
+        try {
+            const response = await api.get('/blogs/');
+            if (response.data) setPosts(response.data);
+        } catch (err) {
+            console.error('Error fetching blogs:', err);
+        }
+        setLoading(false);
+    };
+
+    const deletePost = async (slug) => {
+        if (window.confirm('Are you sure you want to delete this blog post?')) {
+            try {
+                await api.delete(`/blogs/${slug}/`);
+                fetchPosts();
+            } catch (err) {
+                alert('Error deleting post');
+            }
+        }
+    };
+
+    const startEdit = (post) => { setEditingId(post.slug); setEditPost({ ...post }); setEditStatus(''); };
+    const cancelEdit = () => { setEditingId(null); setEditPost(null); setEditStatus(''); };
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            await api.put(`/blogs/${editPost.slug}/`, {
+                title: editPost.title,
+                excerpt: editPost.excerpt,
+                content: editPost.content,
+                image_url: editPost.image_url,
+                published: editPost.published,
+                slug: editPost.slug // Keep existing slug
+            });
+            cancelEdit();
+            fetchPosts();
+        } catch (error) {
+            setEditStatus(`Error: ${error.response?.data?.detail || error.message}`);
+        }
+    };
+
+    const handleImageUpload = async (event, isEdit) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const setUploadingFn = isEdit ? setEditUploading : setUploading;
+        const setStatusFn = isEdit ? setEditStatus : setFormStatus;
+        try {
+            setUploadingFn(true);
+            setStatusFn('Uploading image...');
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const uploadRes = await api.post('/upload/', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            
+            const imageUrl = uploadRes.data.url;
+            
+            if (isEdit) {
+                setEditPost(prev => ({ ...prev, image_url: imageUrl }));
+            } else {
+                setNewPost(prev => ({ ...prev, image_url: imageUrl }));
+            }
+            setStatusFn('Image ready. Click Save to confirm.');
+        } catch (err) {
+            setStatusFn(`Error: ${err.message}`);
+        } finally {
+            setUploadingFn(false);
+        }
+    };
+
+    const handleCreate = async (e) => {
+        e.preventDefault();
+        try {
+            // Generate a simple slug if not present (backend usually handles this, but let's be safe)
+            const slug = newPost.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+            await api.post('/blogs/', { ...newPost, slug });
+            setIsAdding(false);
+            setNewPost({ title: '', excerpt: '', content: '', image_url: '', published: true });
+            setFormStatus('');
+            fetchPosts();
+        } catch (error) {
+            const msg = `Error saving post: ${error.response?.data?.detail || error.message}`;
+            setFormStatus(msg);
+            window.alert(msg);
+        }
+    };
+
+    // Custom image handler for ReactQuill
+    const imageHandler = async (isEdit) => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) return;
+
+            const setStatusFn = isEdit ? setEditStatus : setFormStatus;
+            setStatusFn('Uploading embedded image...');
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                const uploadRes = await api.post('/upload/', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                
+                const imageUrl = uploadRes.data.url;
+
+                // Get the editor instance and insert the image
+                const quill = isEdit
+                    ? editReactQuillRef.current.getEditor()
+                    : reactQuillRef.current.getEditor();
+
+                const range = quill.getSelection(true);
+                quill.insertEmbed(range.index, 'image', imageUrl);
+                quill.setSelection(range.index + 1);
+
+                setStatusFn('Image uploaded successfully.');
+                setTimeout(() => setStatusFn(''), 3000);
+            } catch (err) {
+                setStatusFn(`Error: ${err.message}`);
+            }
+        };
+    };
+
+    const modules = useMemo(() => ({
+        toolbar: {
+            container: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                ['link', 'image'],
+                ['clean']
+            ],
+            handlers: {
+                image: () => imageHandler(false)
+            }
+        }
+    }), []);
+
+    const editModules = useMemo(() => ({
+        toolbar: {
+            container: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                ['link', 'image'],
+                ['clean']
+            ],
+            handlers: {
+                image: () => imageHandler(true)
+            }
+        }
+    }), []);
+
+    const imgInput = (imageUrl, onChangeFile, onChangeUrl, up, remove) => (
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            {imageUrl && (
+                <div style={{ width: '100px', height: '75px', borderRadius: '6px', overflow: 'hidden', flexShrink: 0 }}>
+                    <img src={imageUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+            )}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <label style={{ display: 'block', padding: '10px', border: '2px dashed #e5e7eb', borderRadius: '6px', textAlign: 'center', cursor: up ? 'not-allowed' : 'pointer', backgroundColor: '#f9fafb', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                    {up ? 'Uploading...' : 'Upload Featured Image'}
+                    <input type="file" accept="image/*" onChange={onChangeFile} disabled={up} style={{ display: 'none' }} />
+                </label>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>OR Link:</span>
+                    <input
+                        type="text"
+                        value={imageUrl || ''}
+                        onChange={onChangeUrl}
+                        placeholder="https://example.com/image.jpg"
+                        style={{ flex: 1, padding: '8px', border: '1px solid #e5e7eb', borderRadius: '4px', fontSize: '0.85rem' }}
+                    />
+                </div>
+
+                {imageUrl && <button type="button" onClick={remove} style={{ fontSize: '0.8rem', color: '#ef4444', background: 'none', cursor: 'pointer', textAlign: 'left', marginTop: '4px' }}>Remove Featured Image</button>}
+            </div>
+        </div>
+    );
+
+    if (loading) return <p>Loading blog posts...</p>;
+
+    return (
+        <div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+                <button onClick={() => { setIsAdding(!isAdding); setFormStatus(''); setEditingId(null); }} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Plus size={18} /> {isAdding ? 'Cancel' : 'Add Blog Post'}
+                </button>
+            </div>
+
+            {isAdding && (
+                <form onSubmit={handleCreate} style={{ backgroundColor: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)', marginBottom: '25px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <h3>Create New Blog Post</h3>
+                    {formStatus && <div style={{ padding: '10px', backgroundColor: formStatus.includes('Error') || formStatus.includes('failed') ? '#fef2f2' : '#f0f9ff', color: formStatus.includes('Error') || formStatus.includes('failed') ? '#dc2626' : '#0369a1', borderRadius: '6px' }}>{formStatus}</div>}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Title *</label>
+                            <input type="text" required value={newPost.title} onChange={e => setNewPost({ ...newPost, title: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '6px' }} />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Excerpt</label>
+                            <textarea value={newPost.excerpt} onChange={e => setNewPost({ ...newPost, excerpt: e.target.value })} rows={2} style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '6px' }} />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Content *</label>
+                            <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
+                                <ReactQuill
+                                    ref={reactQuillRef}
+                                    theme="snow"
+                                    value={newPost.content}
+                                    onChange={(content) => setNewPost({ ...newPost, content })}
+                                    modules={modules}
+                                    style={{ height: '300px', marginBottom: '40px' }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Featured Image</label>
+                        {imgInput(
+                            newPost.image_url,
+                            (e) => handleImageUpload(e, false),
+                            (e) => setNewPost({ ...newPost, image_url: e.target.value }),
+                            uploading,
+                            () => setNewPost({ ...newPost, image_url: '' })
+                        )}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <input type="checkbox" id="new-published-blog" checked={newPost.published} onChange={e => setNewPost({ ...newPost, published: e.target.checked })} />
+                            <label htmlFor="new-published-blog">Publish immediately</label>
+                        </div>
+                    </div>
+                    <button type="submit" className="btn-primary" style={{ alignSelf: 'flex-start' }} disabled={uploading}>Save Post</button>
+                </form>
+            )}
+
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)', overflow: 'hidden' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                        <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                            <th style={{ padding: '15px 20px', fontWeight: '500', color: 'var(--text-secondary)' }}>Post Title</th>
+                            <th style={{ padding: '15px 20px', fontWeight: '500', color: 'var(--text-secondary)' }}>Status</th>
+                            <th style={{ padding: '15px 20px', fontWeight: '500', color: 'var(--text-secondary)' }}>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {posts.length === 0 ? (
+                            <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>No blog posts found. Add one to get started.</td></tr>
+                        ) : (
+                            posts.map((post) => (
+                                <React.Fragment key={post.id}>
+                                    <tr style={{ borderBottom: editingId === post.id ? 'none' : '1px solid #e5e7eb', backgroundColor: editingId === post.id ? '#fffbf0' : 'white' }}>
+                                        <td style={{ padding: '15px 20px', fontWeight: '500' }}>{post.title}</td>
+                                        <td style={{ padding: '15px 20px' }}>
+                                            <span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', backgroundColor: post.published ? '#dcfce7' : '#f3f4f6', color: post.published ? '#166534' : '#4b5563' }}>
+                                                {post.published ? 'Published' : 'Draft'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '15px 20px', display: 'flex', gap: '12px' }}>
+                                            <button onClick={() => editingId === post.id ? cancelEdit() : startEdit(post)} style={{ color: editingId === post.id ? '#6b7280' : 'var(--color-terracotta)', fontWeight: '500', fontSize: '0.9rem', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
+                                                {editingId === post.id ? 'Cancel' : 'Edit'}
+                                            </button>
+                                            <button onClick={() => deletePost(post.id)} style={{ color: '#ef4444', fontWeight: '500', fontSize: '0.9rem', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>Delete</button>
+                                        </td>
+                                    </tr>
+                                    {editingId === post.id && editPost && (
+                                        <tr style={{ borderBottom: '2px solid var(--color-terracotta)' }}>
+                                            <td colSpan="3" style={{ padding: '25px', backgroundColor: '#fffbf0' }}>
+                                                <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                                    <h4 style={{ color: 'var(--color-charcoal)', marginBottom: '5px' }}>Editing: {post.title}</h4>
+                                                    {editStatus && <div style={{ padding: '10px', backgroundColor: editStatus.includes('Error') ? '#fef2f2' : '#f0f9ff', color: editStatus.includes('Error') ? '#dc2626' : '#0369a1', borderRadius: '6px' }}>{editStatus}</div>}
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                                                        <div>
+                                                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Title</label>
+                                                            <input type="text" required value={editPost.title} onChange={e => setEditPost({ ...editPost, title: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '6px' }} />
+                                                        </div>
+                                                        <div>
+                                                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Excerpt</label>
+                                                            <textarea value={editPost.excerpt} onChange={e => setEditPost({ ...editPost, excerpt: e.target.value })} rows={2} style={{ width: '100%', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '6px' }} />
+                                                        </div>
+                                                        <div>
+                                                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Content *</label>
+                                                            <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
+                                                                <ReactQuill
+                                                                    ref={editReactQuillRef}
+                                                                    theme="snow"
+                                                                    value={editPost.content}
+                                                                    onChange={(content) => setEditPost({ ...editPost, content })}
+                                                                    modules={editModules}
+                                                                    style={{ height: '300px', marginBottom: '40px' }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Featured Image</label>
+                                                        {imgInput(
+                                                            editPost.image_url,
+                                                            (e) => handleImageUpload(e, true),
+                                                            (e) => setEditPost({ ...editPost, image_url: e.target.value }),
+                                                            editUploading,
+                                                            () => setEditPost({ ...editPost, image_url: '' })
+                                                        )}
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                            <input type="checkbox" id={`edit-pub-blog-${post.id}`} checked={editPost.published} onChange={e => setEditPost({ ...editPost, published: e.target.checked })} />
+                                                            <label htmlFor={`edit-pub-blog-${post.id}`}>Published</label>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                                        <button type="submit" className="btn-primary" disabled={editUploading}>Save Changes</button>
+                                                        <button type="button" onClick={cancelEdit} style={{ padding: '10px 20px', border: '1px solid #e5e7eb', borderRadius: '6px', cursor: 'pointer', background: 'white' }}>Cancel</button>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </React.Fragment>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+export default BlogManager;

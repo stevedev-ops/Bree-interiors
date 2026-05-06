@@ -1,0 +1,452 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+:root {
+  /* Brand Colors */
+  --color-sand: #DCC4AC;
+  --color-terracotta: #C55A44;
+  --color-charcoal: #2F2E2C;
+  --color-muted-olive: #8B9372;
+  --color-warm-white: #F7F5F0;
+
+  /* Backgrounds & Text */
+  --bg-primary: var(--color-warm-white);
+  --bg-secondary: #EBE6DF;
+  --bg-dark: var(--color-charcoal);
+  --text-primary: var(--color-charcoal);
+  --text-secondary: #5A5855;
+  --text-light: var(--color-warm-white);
+
+  /* Typography */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Transitions */
+  --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+.section {
+  padding: 120px 0;
+}
+
+.bg-secondary {
+  background-color: var(--bg-secondary);
+}
+
+/* Common Components */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  background-color: var(--color-charcoal);
+  color: var(--color-warm-white);
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  transition: var(--transition-smooth);
+  border: 1px solid transparent;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-terracotta);
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  transition: var(--transition-smooth);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-charcoal);
+  color: var(--color-warm-white);
+}
+
+/* Animations & Utilities */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes fadeInY {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  opacity: 0;
+  animation: fadeInY 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-100 {
+  transition-delay: 100ms;
+}
+
+.delay-200 {
+  transition-delay: 200ms;
+}
+
+.delay-300 {
+  transition-delay: 300ms;
+}
+
+.delay-400 {
+  transition-delay: 400ms;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mb-1 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 2rem;
+}
+
+.mb-8 {
+  margin-bottom: 4rem;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-terracotta);
+  display: block;
+}
+
+.heading-xl {
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 1.1;
+}
+
+.heading-lg {
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+}
+
+/* Mobile Responsiveness & Utilities */
+.grid-2-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+@media (max-width: 1024px) {
+  .section {
+    padding: 80px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 0;
+  }
+
+  .grid-2-col {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  /* Adjust hero typography */
+  .heading-xl {
+    font-size: clamp(2.5rem, 8vw, 3.5rem);
+  }
+
+  .heading-lg {
+    font-size: clamp(2rem, 6vw, 2.5rem);
+  }
+
+  /* Specific mobile utilities */
+  .mobile-text-center {
+    text-align: center;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* Base Nav Styling */
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+  align-items: center;
+}
+
+/* Mobile Nav Drawer Styling */
+@media (max-width: 768px) {
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 300px;
+    height: 100vh;
+    background-color: var(--color-warm-white);
+    flex-direction: column;
+    padding: 100px 30px 40px;
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease;
+    z-index: 1000;
+  }
+
+  .nav-links.active {
+    right: 0;
+  }
+
+  .nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+  }
+
+  .nav-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* Rich Text Editor Content Styling */
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 2rem 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: block;
+}
+
+.blog-content p {
+  margin-bottom: 1.5rem;
+}
+
+.blog-content h2,
+.blog-content h3,
+.blog-content h4 {
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--color-charcoal);
+}
+
+.blog-content ul,
+.blog-content ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.blog-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Portfolio Page Enhancements */
+
+/* Link Filters */
+.filter-link {
+  position: relative;
+  padding-bottom: 5px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  border: none;
+  background: none;
+}
+
+.filter-link:hover,
+.filter-link.active {
+  color: var(--color-charcoal);
+  font-weight: 500;
+}
+
+.filter-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 50%;
+  background-color: var(--color-terracotta);
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.filter-link:hover::after,
+.filter-link.active::after {
+  width: 100%;
+  left: 0;
+}
+
+/* Masonry Layout */
+.my-masonry-grid {
+  display: flex;
+  margin-left: -30px;
+  /* gutter size offset */
+  width: auto;
+}
+
+.my-masonry-grid_column {
+  padding-left: 30px;
+  /* gutter size */
+  background-clip: padding-box;
+}
+
+.my-masonry-grid_column>div {
+  margin-bottom: 30px;
+  /* space between items */
+}
+
+/* Project Cards Hover Effects */
+.portfolio-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  /* Slight rounding for a premium feel */
+}
+
+.portfolio-card img {
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.portfolio-card:hover img {
+  transform: scale(1.05);
+}
+
+.portfolio-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(47, 46, 44, 0.3);
+  /* Subtle dark wash */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  /* Let clicks pass through to the Link */
+}
+
+.portfolio-card:hover .portfolio-overlay {
+  opacity: 1;
+}
+
+.portfolio-overlay-text {
+  color: var(--color-warm-white);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 12px 24px;
+  border: 1px solid rgba(247, 245, 240, 0.5);
+  transform: translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease;
+  backdrop-filter: blur(2px);
+}
+
+.portfolio-card:hover .portfolio-overlay-text {
+  transform: translateY(0);
+}
+
+.portfolio-overlay-text:hover {
+  background-color: var(--color-warm-white);
+  color: var(--color-charcoal);
+}
